@@ -15,12 +15,14 @@ export class SelectoresPageComponent implements OnInit {
   miFormulario: FormGroup = this.fb.group({
     region: [ '', Validators.required ], 
     pais: [ '', Validators.required ], 
+    frontera: [ '' , Validators.required ], 
   });
 
 
   // llenar selectores
   regiones: string[] = [];
   paisesByRegion: Country[] = [];
+  paisesFronterizos: string[] = [];
 
 
   constructor(private fb: FormBuilder,
@@ -38,6 +40,14 @@ export class SelectoresPageComponent implements OnInit {
       .subscribe(paises => {
         this.paisesByRegion = paises;
       });
+
+    // cuando cambia el país
+    this.miFormulario.get('pais')?.valueChanges
+      .pipe(
+        tap((_) => this.miFormulario.get('frontera')?.reset('')),
+        switchMap(pais => this.paisesService.getPaisByCode(pais))
+      )
+      .subscribe(pais => this.paisesFronterizos = pais?.borders || []);
   }
 
   guardar(): void {
